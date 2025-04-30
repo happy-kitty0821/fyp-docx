@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} VISTA - Download Rules {% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center fw-bold">Download Rules</h2>
+    <hr>
+
+    <!-- Filter Dropdown -->
+    <div class="mb-3">
+        <label for="protocol-filter" class="form-label fw-bold">Filter by Protocol:</label>
+        <select id="protocol-filter" class="form-select">
+            <option value="0">Show All</option>
+            {% for protocol in protocols %}
+                <option value="{{ protocol }}">{{ protocol }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Add Rules Button -->
+    <div class="d-flex justify-content-end mb-3">
+        {% if request.user.role != "OPERATOR" %}
+            <form action="{% url 'create_rule' %}" method="get">
+                <button type="submit" class="btn btn-secondary">
+                    <i class="bi bi-plus-circle"></i> Add Rules
+                </button>
+            </form>
+        {% else %}
+            <button type="button" class="btn btn-secondary" disabled>
+                <i class="bi bi-plus-circle"></i> Add Rules
+            </button>
+        {% endif %}
+    </div>
+
+    <!-- Download Rules Button (Visible for all users) -->
+    <div class="d-flex justify-content-end mb-3">
+        <form action="{% url 'download_rules_zip' %}" method="get">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-download"></i> Download Rules
+            </button>
+        </form>
+    </div>
+
+    <!-- Rules Table -->
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Rule ID</th>
+                    <th>Message</th>
+                    <th>Action</th>
+                    <th>Protocol</th>
+                </tr>
+            </thead>
+            <tbody id="rules-table-body">
+                {% for rule in rules %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ rule.sid }}</td>
+                        <td>{{ rule.msg }}</td>
+                        <td>{{ rule.action }}</td>
+                        <td>{{ rule.protocol }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No rules available</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <nav>
+        <ul class="pagination justify-content-center" id="pagination">
+            <!-- Pagination buttons will be added dynamically here -->
+        </ul>
+    </nav>
+</div>
+{% endblock content %}
+
+{% block js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        function fetchRules(page = 1) {
+            var selectedProtocol = $("#protocol-filter").val();
+            $.ajax({
+                url: "{% url 'filter_rules' %}",
+                data: { protocol: selectedProtocol, page: page },
+                dataType: "json",
+                success: function (data) {
+                    var tableBody = $("#rules-table-body");
+                    tableBody.empty();
+
+                    if (data.rules.length > 0) {
+                        $.each(data.rules, function (index, rule) {
+                            tableBody.append(`
+                                <tr>
+                                    <th scope="row">${(page - 1) * 15 + index + 1}</th>
+                                    <td>${rule.sid}</td>
+                                    <td>${rule.msg}</td>
+                                    <td>${rule.action}</td>
+                                    <td>${rule.protocol}</td>
+                                </tr>
+                            `);
+                        });
+                    } else {
+                        tableBody.append(`
+                            <tr>
+                                <td colspan="5" class="text-center">No rules available</td>
+                            </tr>
+                        `);
+                    }
+
+                    updatePagination(data.current_page, data.total_pages);
+                }
+            });
+        }
+
+        function updatePagination(currentPage, totalPages) {
+            var paginationContainer = $("#pagination");
+            paginationContainer.empty();
+
+            if (totalPages > 1) {
+                if (currentPage > 1) {
+                    paginationContainer.append(`<li class="page-item"><a class="page-link" href="#" onclick="fetchRules(${currentPage - 1})">Previous</a></li>`);
+                }
+
+                for (var i = 1; i <= totalPages; i++) {
+                    var activeClass = (i === currentPage) ? "active" : "";
+                    paginationContainer.append(`<li class="page-item ${activeClass}"><a class="page-link" href="#" onclick="fetchRules(${i})">${i}</a></li>`);
+                }
+
+                if (currentPage < totalPages) {
+                    paginationContainer.append(`<li class="page-item"><a class="page-link" href="#" onclick="fetchRules(${currentPage + 1})">Next</a></li>`);
+                }
+            }
+        }
+
+        // Filter change
+        $("#protocol-filter").change(function () {
+            fetchRules(1);
+        });
+
+        // Initial fetch
+        fetchRules();
+    });
+</script>
+{% endblock js %}

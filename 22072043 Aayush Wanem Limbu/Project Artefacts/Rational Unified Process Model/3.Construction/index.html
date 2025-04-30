@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} VISTA-Home {{ username }}{% endblock %}
+{% block css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+<style>
+  .container {
+    width: 90%;
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    font-weight: bolder;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    color: #000000;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    justify-content: center;
+  }
+
+  .card {
+    padding: 20px;
+    border-radius: 7px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  }
+
+  .card h3 {
+    margin-top: 0;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: white;
+  }
+
+  .count {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 400;
+    margin-top: 10px;
+    color: #fff;
+  }
+
+  .card-1 {
+    background: #eb0303 !important;
+  }
+
+  .card-2 {
+    background: #ec830c !important;
+  }
+
+  .card-3 {
+    background: #1e8e05 !important;
+  }
+
+  .card-4 {
+    background: #0888ea !important;
+  }
+
+
+  .card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  }
+
+  hr {
+    border: 2px solid #1d1d1d;
+    /* Thick dark line */
+    margin: 10px 0;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<!-- <h1>welcome <span>{{username}} your role is : {{ userRole }}</span></h1>
+        <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a> -->
+<div class="container mt-5">
+  <div class="container-fluid">
+    <h2 class="text-start">VISTA NIDS - Threat Summary</h2>
+    <div class="cards">
+      <div class="card card-1">
+        <h3>699</h3>
+        <span class="count">High Alerts</span>
+      </div>
+      <div class="card card-2">
+        <h3>69</h3>
+        <span class="count">Medium Alerts</span>
+      </div>
+      <div class="card card-3">
+        <h3>69</h3>
+        <span class="count">Low Level Alerts</span>
+      </div>
+      <div class="card card-4">
+        <h3>69</h3>
+        <span class="count">Information Log</span>
+      </div>
+    </div>
+  </div>
+  <br>
+  <hr>
+  <br>
+  <div class="alerts-and-logs-area-chart">
+    <h1 class="text-center">Timeline Alert Chart</h1>
+    <div class="chart" id="area-chart"></div>
+  </div>
+  <div class="container mt-4">
+    <h3 class="text-black, text-center">Recent Alerts</h3>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card bg-dark text-white mb-3">
+          <div class="card-body">
+            <h5 class="card-title text-bold text-center">High Alert</h5>
+            <hr>
+            <div id="high-log-container"></div>
+            <hr>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card bg-dark text-white mb-3">
+          <div class="card-body">
+            <h5 class="card-title text-bold text-center">Medium Alert</h5>
+            <hr>
+            <div id="medium-log-container"></div>
+            <hr>
+          </div>
+        </div>
+      </div>
+      <br><br>
+      <hr>
+      <br><br>
+      <div class="col-md-6">
+        <div class="card bg-dark text-white mb-3">
+          <div class="card-body">
+            <h5 class="card-title text-bold text-center">Low Alert</h5>
+            <hr>
+            <div id="low-log-container"></div>
+            <hr>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card bg-dark text-white mb-3">
+          <div class="card-body">
+            <h5 class="card-title text-bold text-center">Informations</h5>
+            <hr>
+            <div id="info-log-container"></div>
+            <hr>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr>
+
+  <!-- Filter Alerts & Incoming Traffic Map -->
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <h4 class="card-title text-bold text-center">Filter Alerts</h4>
+      <div class="d-flex mb-3">
+        <input type="date" class="form-control me-2" placeholder="Select Date Range">
+        <select class="form-control me-2">
+          <option selected>Select Alert Type</option>
+          <option>High</option>
+          <option>Medium</option>
+          <option>Low</option>
+        </select>
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox">
+          <label class="form-check-label">Severity</label>
+        </div>
+      </div>
+      <canvas id="log-alert-count-bar-chart"></canvas>
+    </div>
+
+    <div class="col-md-6">
+      <a style="text-decoration: none;" href="{% url 'threat-map' %}">
+        <h4 class="text-black text-bold text-center">Outgoing Network Traffic Map</h4>
+        <!-- <div>{{ map_html | safe }}</div> -->
+        <div id="outgoingtrafficMap" style="height: 400px;"></div>
+        <div id="outgoingIpMapTable" class="outgoingIpMapTable" style="display: none;"></div>
+      </a>
+    </div>
+
+  </div>
+</div>
+<div id="session-v4-public-data" public_v4_addr="{{ request.session.host_ip_info }}"></div>
+</div>
+  {% block js %}
+    <!-- Add ApexCharts Library -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <!-- Leaflet Heat Plugin -->
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="{% static 'js/index-bar-graph-socket-conn.js' %}"></script>
+    <script type="module" src="{% static 'js/outgoing-traffic-map.js' %}"></script>
+  {% endblock %}
+{% endblock content %}

@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Create New User {% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .register-container {
+        max-width: 450px;
+        margin: auto;
+        padding: 30px;
+        background: #ffffff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        transition: 0.3s;
+    }
+
+    .register-container:hover {
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+    }
+
+    h2 {
+        text-align: center;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .form-control {
+        border-radius: 5px;
+        padding: 10px;
+    }
+
+    .btn-custom {
+        background: #007bff;
+        color: #fff;
+        border-radius: 5px;
+        padding: 10px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .btn-custom:hover {
+        background: #0056b3;
+    }
+
+    .icon-input {
+        position: relative;
+    }
+
+    .icon-input i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+
+    .icon-input input {
+        padding-left: 40px;
+    }
+
+    /* Custom alert styles for error */
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border-color: #f5c6cb;
+    }
+</style>
+
+<div class="container mt-5">
+    <!-- ✅ Django Messages Block -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} {% if message.tags == 'error' %}alert-error{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <!-- End of Messages Block -->
+
+    <div class="register-container">
+        <h2><i class="fa fa-user-plus"></i> Create New User</h2>
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="mb-3 icon-input">
+                <i class="fa fa-user"></i>
+                <input type="text" name="firstname" class="form-control" placeholder="First Name" required>
+            </div>
+
+            <div class="mb-3 icon-input">
+                <i class="fa fa-user"></i>
+                <input type="text" name="lastname" class="form-control" placeholder="Last Name" required>
+            </div>
+
+            <div class="mb-3 icon-input">
+                <i class="fa fa-user-circle"></i>
+                <input type="text" name="username" class="form-control" placeholder="Username" required>
+            </div>
+
+            <div class="mb-3 icon-input">
+                <i class="fa fa-envelope"></i>
+                <input type="email" name="email" class="form-control" placeholder="Email Address" required>
+            </div>
+
+            <div class="mb-3 icon-input">
+                <i class="fa fa-phone"></i>
+                <input type="text" name="phone" class="form-control" placeholder="Phone Number">
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-custom w-100">
+                    <i class="fa fa-user-shield"></i> Register
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

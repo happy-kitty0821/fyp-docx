@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}VISTA - Create Rules{% endblock %}
+
+{% block content %}
+<!-- Admin/Operator Role-Based Options -->
+<div class="card shadow p-4 mb-4 bg-white rounded">
+    <div class="card-body">
+        {% if role == "ADMIN" %}
+        <h5 class="card-title mb-3">Admin Options</h5>
+        <div class="row g-3">
+            <div class="col-md-6 d-grid">
+                <a href="{% url 'manage-rules' %}" class="btn btn-primary">Manage Rules</a>
+            </div>
+            <div class="col-md-6 d-grid">
+                <a href="{% url 'download-rules' %}" class="btn btn-secondary">Download Rules</a>
+            </div>
+        </div>
+
+        {% elif role == "OPERATOR" %}
+        <h5 class="card-title mb-3">Operator Options</h5>
+        <div class="row g-3">
+            <div class="col-md-6 d-grid">
+                <a href="{% url 'download-rules' %}" class="btn btn-secondary">Download Rules</a>
+            </div>
+            <div class="col-md-6 d-grid">
+                <a href="{% url 'manage-rules' %}" class="btn btn-info">View All Rules</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Create New Rule Section -->
+<div class="container mt-4">
+    <h1>Create a New Rule</h1>
+
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="card shadow-sm p-4 mb-4 bg-light">
+        <form method="POST" action="{% url 'create_rule' %}">
+            {% csrf_token %}
+            <div class="row">
+                <!-- Left Column -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="sid" class="form-label">SID</label>
+                        <input type="text" class="form-control" id="sid" name="sid" min="1" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="protocol" class="form-label">Protocol</label>
+                        <input type="text" class="form-control" id="protocol" name="protocol" placeholder="e.g. tcp, udp, icmp" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="action" class="form-label">Action</label>
+                        <input type="text" class="form-control" id="action" name="action" placeholder="e.g. alert, log" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="sourceIp" class="form-label">Source IP</label>
+                        <input type="text" class="form-control" id="sourceIp" name="sourceIp" placeholder="e.g. any, $EXTERNAL_NET, or 192.168.0.1">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="sourcePort" class="form-label">Source Port</label>
+                        <input type="text" class="form-control" id="sourcePort" name="sourcePort" placeholder="e.g. any, 80, 80:443">
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="destinationIp" class="form-label">Destination IP</label>
+                        <input type="text" class="form-control" id="destinationIp" name="destinationIp" placeholder="e.g. any, $HOME_NET, or 10.0.0.5">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="destinationPort" class="form-label">Destination Port</label>
+                        <input type="text" class="form-control" id="destinationPort" name="destinationPort" placeholder="e.g. any, 443, 1:65535">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="msg" class="form-label">Message</label>
+                        <textarea class="form-control" id="msg" name="msg" rows="2" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Content</label>
+                        <textarea class="form-control" id="content" name="content" rows="2"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reference" class="form-label">Reference</label>
+                        <textarea class="form-control" id="reference" name="reference" rows="2"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            {% if role == "ADMIN" %}
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary">Create Rule</button>
+            </div>
+            {% else %}
+            <p class="text-danger text-center fw-bold">Only Admins can Create Rules</p>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Snort Rule Output -->
+    <div class="display-snort card p-3 mt-4 shadow-sm">
+        <h3 class="text-center">Snort Rules</h3>
+        <div id="rule-output"></div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block js %}
+<script src="{% static 'js/display-snort-like-rule.js' %}"></script>
+<script src="{% static 'js/check-sid.js' %}"></script>
+{% endblock js %}
